@@ -1,12 +1,35 @@
-# DHTimeAxis
-### 是在DHTimeAxis基础上修改的IoT时间轴，支持时间刻度选择，目前只支持横屏
-### 主要修改的类：DHTimeAxisRuleRenderer
-@[TOC](IoT视频时间轴)
-# 主要修改代码
-## 效果展示
+//  DHTimeAxisRuleRenderer.m
+//  DHTimeAxis
+//
+//  Create by daniel.hu on 2018/11/12.
+//  Copyright © 2018年 daniel. All rights reserved.
 
-#主要修改代码
-```objectivec
+#import "DHTimeAxisRuleRenderer.h"
+
+@implementation DHTimeAxisRuleRenderer
+/// 绘制数据
+- (void)visitTimeAxisData:(DHTimeAxisData *)aTimeAxisData {
+    // 没有画刻度跳过
+    if (![aTimeAxisData isKindOfClass:[DHTimeAxisData class]]) return ;
+    
+    // 不在可见区间内的时间段 跳过
+    if (aTimeAxisData.startTimeInterval > self.maxTimeInVisible
+        || aTimeAxisData.endTimeInterval < self.minTimeInVisible) {
+        return ;
+    }
+    
+    
+    // 画数据线条
+    [super visitTimeAxisData:aTimeAxisData];
+    if (self.axisDirection == DHTimeAxisDirectionHorizontal) {
+        CGPoint from = CGPointMake((aTimeAxisData.startTimeInterval - self.minTimeInVisible) * self.aSecondOfPixel, aTimeAxisData.strokeSize/2.0);
+        CGPoint to = CGPointMake((aTimeAxisData.endTimeInterval - self.minTimeInVisible) * self.aSecondOfPixel, aTimeAxisData.strokeSize/2.0);
+        [self drawLineWithContext:self.context from:from to:to];
+    } else {
+        [self drawLineWithContext:self.context from:CGPointMake((self.viewHeight-aTimeAxisData.strokeSize)/2.0, (aTimeAxisData.startTimeInterval - self.minTimeInVisible) * self.aSecondOfPixel) to:CGPointMake((self.viewHeight-aTimeAxisData.strokeSize)/2.0, (aTimeAxisData.endTimeInterval - self.minTimeInVisible) * self.aSecondOfPixel)];
+    }
+    
+}
 /// 绘制时间轴每段
 - (void)visitTimeAxisDigitalDivision:(DHTimeAxisDigitalDivision *)aTimeAxisDigitalDivision {
 
@@ -175,6 +198,40 @@
     CGRect rect = CGRectMake(point.x-13, startY, textSize.width, textSize.height);
     [text drawInRect:rect withAttributes:division.digitalAttribute];
 }
-```
-## 效果展示
-fnvfjvfkv
+
+/// 绘制标尺刻度线
+- (void)visitTimeAxisRule:(DHTimeAxisRule *)aTimeAxisRule {
+    
+    aTimeAxisRule.strokeColor = [UIColor redColor];
+    aTimeAxisRule.strokeSize = 5.0f;
+    
+    [super visitTimeAxisRule:aTimeAxisRule];
+    if (self.axisDirection == DHTimeAxisDirectionHorizontal) {
+        [self drawLineWithContext:self.context from:CGPointMake(aTimeAxisRule.fixedOffset, 0) to:CGPointMake(aTimeAxisRule.fixedOffset, self.viewHeight)];
+    } else {
+        [self drawLineWithContext:self.context from:CGPointMake(0, aTimeAxisRule.fixedOffset) to:CGPointMake(self.viewWidth, aTimeAxisRule.fixedOffset)];
+    }
+    
+}
+/// 绘制基线
+- (void)visitTimeAxisBaseLine:(DHTimeAxisBaseLine *)aTimeAxisBaseLine {
+    [super visitTimeAxisBaseLine:aTimeAxisBaseLine];
+    
+    aTimeAxisBaseLine.strokeColor = [UIColor blackColor];
+    [super visitTimeAxisBaseLine:aTimeAxisBaseLine];
+    
+    if (self.axisDirection == DHTimeAxisDirectionHorizontal) {
+//        [self drawLineWithContext:self.context from:CGPointMake(0, aTimeAxisBaseLine.fixedOffset-aTimeAxisBaseLine.strokeSize/2.0) to:CGPointMake(self.viewWidth, aTimeAxisBaseLine.fixedOffset-aTimeAxisBaseLine.strokeSize/2.0)];
+        
+        [self drawLineWithContext:self.context from:CGPointMake(0, 0) to:CGPointMake(self.viewWidth, 0)];
+        
+        [self drawLineWithContext:self.context from:CGPointMake(0, self.viewHeight) to:CGPointMake(self.viewWidth, self.viewHeight)];
+    } else {
+        [self drawLineWithContext:self.context from:CGPointMake(aTimeAxisBaseLine.fixedOffset-aTimeAxisBaseLine.strokeSize/2.0, 0) to:CGPointMake(aTimeAxisBaseLine.fixedOffset-aTimeAxisBaseLine.strokeSize/2.0, self.viewHeight)];
+    }
+}
+/// 绘制背景
+- (void)visitTimeAxisBackground:(DHTimeAxisBackground *)aTimeAxisBackground {
+    
+}
+@end
