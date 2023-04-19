@@ -1,9 +1,6 @@
 # DHTimeAxis
 ### 是在DHTimeAxis基础上修改的IoT时间轴，支持时间刻度选择，目前只支持横屏
 ### 主要修改的类：DHTimeAxisRuleRenderer
-@[TOC](IoT视频时间轴)
-# 主要修改代码
-## 效果展示
 
 #主要修改代码
 ```objectivec
@@ -176,5 +173,4 @@
     [text drawInRect:rect withAttributes:division.digitalAttribute];
 }
 ```
-## 效果展示
-fnvfjvfkv
+# 效果展示
